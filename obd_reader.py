@@ -69,11 +69,11 @@ def get_fuel_cons_via_fuel_trim(connection: obd.OBD, speed_kmh: float) -> Option
             engine_load = load_res.value.magnitude
             rpm = rpm_res.value.magnitude
 
-            # Calculate air-fuel ratio adjustment
+            # Adjust air-fuel ratio based on fuel trims
             air_fuel_ratio = 14.7 * (1 + (short_trim + long_trim) / 100)
-            # Calculate fuel flow rate in grams per second
+            # Estimate fuel flow rate in grams per second
             fuel_flow_rate_g_per_s = (engine_load / 100) * rpm * 0.5 / air_fuel_ratio
-            # Convert fuel flow rate to grams per hour
+            # Convert to grams per hour
             fuel_flow_rate_g_per_h = fuel_flow_rate_g_per_s * 3600
             # Calculate fuel consumption per 100 km
             fuel_cons_g_per_100km = (fuel_flow_rate_g_per_h * 100) / speed_kmh
@@ -98,10 +98,10 @@ def get_fuel_cons_via_engine_load(connection: obd.OBD, speed_kmh: float) -> Opti
             engine_load = load_res.value.magnitude
             rpm = rpm_res.value.magnitude
 
-            # Calculate fuel flow rate in grams per second
+            # Estimate fuel flow rate in grams per second
             air_fuel_ratio = 14.7
             fuel_flow_rate_g_per_s = (engine_load / 100) * rpm * 0.5 / air_fuel_ratio
-            # Convert fuel flow rate to grams per hour
+            # Convert to grams per hour
             fuel_flow_rate_g_per_h = fuel_flow_rate_g_per_s * 3600
             # Calculate fuel consumption per 100 km
             fuel_cons_g_per_100km = (fuel_flow_rate_g_per_h * 100) / speed_kmh

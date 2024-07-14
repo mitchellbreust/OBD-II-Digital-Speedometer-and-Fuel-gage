@@ -28,7 +28,15 @@ from obd_reader import (
 
 def run_tests():
     # Create a mock connection
-    supported_commands = {obd.commands.SPEED, obd.commands.FUEL_LEVEL, obd.commands.MAF, obd.commands.SHORT_FUEL_TRIM_1, obd.commands.LONG_FUEL_TRIM_1, obd.commands.ENGINE_LOAD, obd.commands.RPM}
+    supported_commands = {
+        obd.commands.SPEED,
+        obd.commands.FUEL_LEVEL,
+        obd.commands.MAF,
+        obd.commands.SHORT_FUEL_TRIM_1,
+        obd.commands.LONG_FUEL_TRIM_1,
+        obd.commands.ENGINE_LOAD,
+        obd.commands.RPM
+    }
     mock_connection = MockOBD(supported_commands)
 
     # Define mock responses
@@ -40,19 +48,19 @@ def run_tests():
     fuel_level_response.value = MagicMock(magnitude=50.0)  # 50%
 
     maf_response = MagicMock()
-    maf_response.value = MagicMock(magnitude=5.0)  # 5 g/s
+    maf_response.value = MagicMock(magnitude=10.0)  # 10 g/s, more typical value
 
     short_trim_response = MagicMock()
-    short_trim_response.value = MagicMock(magnitude=5.0)  # 5%
+    short_trim_response.value = MagicMock(magnitude=0.0)  # 0% STFT
 
     long_trim_response = MagicMock()
-    long_trim_response.value = MagicMock(magnitude=5.0)  # 5%
+    long_trim_response.value = MagicMock(magnitude=0.0)  # 0% LTFT
 
     engine_load_response = MagicMock()
-    engine_load_response.value = MagicMock(magnitude=80.0)  # 80%
+    engine_load_response.value = MagicMock(magnitude=20.0)  # 20% engine load
 
     rpm_response = MagicMock()
-    rpm_response.value = MagicMock(magnitude=3000.0)  # 3000 RPM
+    rpm_response.value = MagicMock(magnitude=2000.0)  # 2000 RPM
 
     # Set mock responses
     mock_connection.set_query_response(obd.commands.SPEED, speed_response)
