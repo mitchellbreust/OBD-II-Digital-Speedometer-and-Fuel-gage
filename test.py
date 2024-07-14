@@ -15,7 +15,7 @@ class MockOBD(obd.OBD):
     def set_query_response(self, command, response):
         self.query_responses[command] = response
 
-# Import your functions from main.py
+# Import your functions from obd_reader.py
 from obd_reader import (
     get_speed,
     get_fuel_level,

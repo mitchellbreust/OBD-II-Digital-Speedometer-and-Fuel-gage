@@ -69,12 +69,18 @@ def get_fuel_cons_via_fuel_trim(connection: obd.OBD, speed_kmh: float) -> Option
             engine_load = load_res.value.magnitude
             rpm = rpm_res.value.magnitude
 
+            # Calculate air-fuel ratio adjustment
             air_fuel_ratio = 14.7 * (1 + (short_trim + long_trim) / 100)
-            fuel_consumption_per_s = (engine_load * rpm * 0.5) / air_fuel_ratio  # Estimated grams per second
-            fuel_consumption_per_100km = (fuel_consumption_per_s * 3600 * 100) / speed_kmh
-            fuel_consumption_per_100km_l = fuel_consumption_per_100km / 735.5  # Convert to liters
+            # Calculate fuel flow rate in grams per second
+            fuel_flow_rate_g_per_s = (engine_load / 100) * rpm * 0.5 / air_fuel_ratio
+            # Convert fuel flow rate to grams per hour
+            fuel_flow_rate_g_per_h = fuel_flow_rate_g_per_s * 3600
+            # Calculate fuel consumption per 100 km
+            fuel_cons_g_per_100km = (fuel_flow_rate_g_per_h * 100) / speed_kmh
+            # Convert grams to liters (density of gasoline ~735.5 g/L)
+            fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5
 
-            return fuel_consumption_per_100km_l
+            return fuel_cons_l_per_100km
     except Exception as e:
         print(f"Failed to get fuel trim data: {e}", file=sys.stderr)
     return None
@@ -89,14 +95,18 @@ def get_fuel_cons_via_engine_load(connection: obd.OBD, speed_kmh: float) -> Opti
         rpm_res = connection.query(rpm_cmd)
 
         if load_res.value and rpm_res.value:
-            engine_load = load_res.value.magnitude / 100  # Engine load as a fraction
+            engine_load = load_res.value.magnitude
             rpm = rpm_res.value.magnitude
 
-            # Estimate fuel consumption based on engine load and RPM
+            # Calculate fuel flow rate in grams per second
             air_fuel_ratio = 14.7
-            fuel_cons_g_per_s = (engine_load * rpm * 0.5) / air_fuel_ratio  # grams per second
-            fuel_cons_g_per_100km = (fuel_cons_g_per_s * 3600 * 100) / speed_kmh
-            fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5  # Convert to liters
+            fuel_flow_rate_g_per_s = (engine_load / 100) * rpm * 0.5 / air_fuel_ratio
+            # Convert fuel flow rate to grams per hour
+            fuel_flow_rate_g_per_h = fuel_flow_rate_g_per_s * 3600
+            # Calculate fuel consumption per 100 km
+            fuel_cons_g_per_100km = (fuel_flow_rate_g_per_h * 100) / speed_kmh
+            # Convert grams to liters (density of gasoline ~735.5 g/L)
+            fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5
 
             return fuel_cons_l_per_100km
     except Exception as e:
