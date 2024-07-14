@@ -4,6 +4,9 @@ from typing import Optional
 
 connection = obd.OBD()
 
+def is_command_supported(connection: obd.OBD, command: obd.commands.OBDCommand) -> bool:
+    return command in connection.supported_commands
+
 def get_speed(connection: obd.OBD) -> Optional[float]:
     try:
         cmd = obd.commands.SPEED
@@ -100,17 +103,20 @@ def get_fuel_cons_via_engine_load(connection: obd.OBD, speed_kmh: float) -> Opti
 
 # Main function to determine the best method to estimate fuel consumption
 def get_fuel_consumption(connection: obd.OBD, speed_kmh: float) -> Optional[float]:
-    fuel_cons = get_fuel_cons_via_mass_air_flow(connection, speed_kmh)
-    if fuel_cons is not None:
-        return fuel_cons
+    if is_command_supported(connection, obd.commands.MAF):
+        fuel_cons = get_fuel_cons_via_mass_air_flow(connection, speed_kmh)
+        if fuel_cons is not None:
+            return fuel_cons
     
-    fuel_cons = get_fuel_cons_via_fuel_trim(connection, speed_kmh)
-    if fuel_cons is not None:
-        return fuel_cons
+    if is_command_supported(connection, obd.commands.SHORT_FUEL_TRIM_1) and is_command_supported(connection, obd.commands.LONG_FUEL_TRIM_1):
+        fuel_cons = get_fuel_cons_via_fuel_trim(connection, speed_kmh)
+        if fuel_cons is not None:
+            return fuel_cons
     
-    fuel_cons = get_fuel_cons_via_engine_load(connection, speed_kmh)
-    if fuel_cons is not None:
-        return fuel_cons
+    if is_command_supported(connection, obd.commands.ENGINE_LOAD) and is_command_supported(connection, obd.commands.RPM):
+        fuel_cons = get_fuel_cons_via_engine_load(connection, speed_kmh)
+        if fuel_cons is not None:
+            return fuel_cons
     
     print("Failed to estimate fuel consumption using available methods.", file=sys.stderr)
     return None
