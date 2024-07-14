@@ -5,8 +5,9 @@ from typing import Optional
 
 connection = obd.OBD()
 
-def is_command_supported(connection: obd.OBD, command: obd.commands.OBDCommand) -> bool:
+def is_command_supported(connection: obd.OBD, command) -> bool:
     return command in connection.supported_commands
+
 
 def get_speed(connection: obd.OBD) -> Optional[float]:
     try:
