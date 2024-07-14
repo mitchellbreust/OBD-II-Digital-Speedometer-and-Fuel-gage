@@ -143,12 +143,14 @@ def main_loop():
             if speed is None:
                 print("Failed to get speed. Retrying...")
                 time.sleep(0.1)
+                speed = get_speed(connection)
 
         if fuel_level_supported:
             fuel = get_fuel_level(connection)
             if fuel is None:
                 print("Failed to get fuel level. Retrying...")
                 time.sleep(0.1)
+                fuel = get_fuel_level(connection)
 
         if fuel_cons_supported and speed is not None:
             fuel_con = get_fuel_consumption(connection, speed)
