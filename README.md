@@ -13,8 +13,6 @@ This project leverages an embedded system to create a dual-function vehicle dash
 - **Fuel Percentage**: Displays the remaining fuel as a percentage of the tank's capacity on the screen.
 - **Diagnostic Codes**: Provides real-time diagnostic codes from the vehicle's OBD system, accessible via the hosted website.
 - **Statistical Dashboard**: Displays detailed graphs and averages of vehicle data through a web interface hosted by the device. The frontend is built with React, and the backend uses Express.js.
-- **Data Management**: Uses PostgreSQL to store and manage vehicle data, enabling complex queries and data integrity.
-- **Python Data Handling**: Maintains a live connection to the car's OBD-II system to retrieve data and perform initial analysis before serving it to the digvital display and storing it in PostgreSQL (which is further supported by a data buffer)
 - **Wi-Fi Connectivity**: The device hosts a local network, allowing users to connect via Wi-Fi and automatically display the dashboard on a connected device.
 - **Automatic Startup**: The program runs automatically on system startup using a systemd service.
 - **Portable Power**: Capable of running on a battery pack for portability.
