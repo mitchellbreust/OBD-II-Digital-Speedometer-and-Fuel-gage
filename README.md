@@ -21,6 +21,7 @@ This project leverages an embedded system to create a dual-function vehicle dash
 ## Software Components
 - **Data Management:** Uses PostgreSQL to store and manage vehicle data, enabling complex queries and data integrity.
 - **Python Data Handling:** Maintains a live connection to the car's OBD-II system to retrieve data and perform initial analysis before serving it to the digvital display and storing it in PostgreSQL (which is further supported by a data buffer)
+- **CarMD API:** Uses external api, CarMD, to describe what a diagnostic code means for the user
 - **Rest API For Data Retrival:** A service built with golag to interact with postgres database and retrieve requested data
 - **Gateway API:** Service to handle user interactions with frontend
 - **Front end:** The dashbored user interface is built with Express.js
