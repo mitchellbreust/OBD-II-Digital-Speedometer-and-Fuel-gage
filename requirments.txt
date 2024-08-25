@@ -1,1 +1,2 @@
 obd
+psycopg2-binary

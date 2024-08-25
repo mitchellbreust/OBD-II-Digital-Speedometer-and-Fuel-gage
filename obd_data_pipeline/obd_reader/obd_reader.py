@@ -9,9 +9,6 @@ def is_command_supported(connection: obd.OBD, command) -> bool:
     return command in connection.supported_commands
 
 def main_loop():
-    speed_is_supported = is_command_supported(connection, obd.commands.SPEED)
-    fuel_level_supported = is_command_supported(connection, obd.commands.FUEL_LEVEL)
-    fuel_cons_supported = is_fuel_cons_supported(connection)
 
     speed = 0
     fuel = 0.00
