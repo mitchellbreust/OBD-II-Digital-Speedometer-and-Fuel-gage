@@ -15,6 +15,13 @@ CREATE TABLE Fuel_level (
     timestamp_id INT REFERENCES timestamps(id)
 );
 
+CREATE TABLE Fuel_cons (
+    id SERIAL PRIMARY KEY,
+    User_Id INT REFERENCES User(id),
+    consumption FLOAT NOT NULL,
+    timestamp_id INT REFERENCES timestamps(id)
+);
+
 CREATE TABLE Mass_air_flow (
     id SERIAL PRIMARY KEY,
     User_Id INT REFERENCES User(id),
