@@ -1,6 +1,5 @@
 import sys
 from typing import Optional
-
 # Function to calculate fuel consumption in L/100km using MAF data
 def get_fuel_cons(speed_kmh: float, maf_magnitude) -> Optional[float]:
     try:

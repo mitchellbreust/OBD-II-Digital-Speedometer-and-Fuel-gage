@@ -1,3 +1,6 @@
+import obd
+from typing import Optional
+
 def get_battery_voltage(connection: obd.OBD) -> Optional[float]:
     if not connection.supports(obd.commands.ELM_VOLTAGE):
         print("Battery Voltage command not supported by this vehicle.")

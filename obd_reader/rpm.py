@@ -1,3 +1,6 @@
+import obd
+from typing import Optional
+
 def get_rpm(connection: obd.OBD) -> Optional[float]:
     if not connection.supports(obd.commands.RPM):
         print("RPM command not supported by this vehicle.")

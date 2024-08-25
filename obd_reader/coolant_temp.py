@@ -1,3 +1,6 @@
+import obd
+from typing import Optional
+
 def get_coolant_temp(connection: obd.OBD) -> Optional[float]:
     if not connection.supports(obd.commands.COOLANT_TEMP):
         print("Coolant Temperature command not supported by this vehicle.")
