@@ -6,8 +6,6 @@ from obd_read.obd_reader import Obd_reader
 from data_writer.database_writer import Database_writer
 from typing import Optional
 
-# maybe take the time, when in the loop we detect a one min time difference we then get averages and write to db? then clear buffer?
-
 def main():
     connection = obd.OBD()
     reader = Obd_reader(connection)
@@ -42,4 +40,4 @@ def main():
 
         time.sleep(0.5)
 
-
+        

@@ -43,12 +43,16 @@ class Database_writer:
 
 
 def insert_fuel_level(cursor, userid, timestamp_id, fuel_level):
+    if not fuel_level:
+        return
     cursor.execute("""
         INSERT INTO Fuel_level (User_Id, fuel, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, fuel_level, timestamp_id))
 
 def insert_fuel_cons(cursor, userid, timestamp_id, consumption):
+    if not consumption:
+        return
     cursor.execute("""
         INSERT INTO Fuel_cons (User_Id, consumption, timestamp_id)
         VALUES (%s, %s, %s);
@@ -56,42 +60,56 @@ def insert_fuel_cons(cursor, userid, timestamp_id, consumption):
 
 
 def insert_mass_air_flow(cursor, userid, timestamp_id, air_flow):
+    if not air_flow:
+        return
     cursor.execute("""
         INSERT INTO Mass_air_flow (User_Id, air_flow, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, air_flow, timestamp_id))
 
 def insert_oxygen(cursor, userid, timestamp_id, oxygen_level):
+    if not oxygen_level:
+        return
     cursor.execute("""
         INSERT INTO Oxygen (User_Id, oxygen_level, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, oxygen_level, timestamp_id))
 
 def insert_speed_kph(cursor, userid, timestamp_id, speed):
+    if not speed:
+        return
     cursor.execute("""
         INSERT INTO Speed_kph (User_Id, speed, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, speed, timestamp_id))
 
 def insert_throttle(cursor, userid, timestamp_id, position):
+    if not position:
+        return
     cursor.execute("""
         INSERT INTO Throttle (User_Id, position, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, position, timestamp_id))
 
 def insert_coolant(cursor, userid, timestamp_id, temp):
+    if not temp:
+        return
     cursor.execute("""
         INSERT INTO Coolant (User_Id, temp, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, temp, timestamp_id))
 
 def insert_intake_manifold(cursor, userid, timestamp_id, level):
+    if not level:
+        return
     cursor.execute("""
         INSERT INTO Intake_manifold (User_Id, level, timestamp_id)
         VALUES (%s, %s, %s);
     """, (userid, level, timestamp_id))
 
 def insert_rpm(cursor, userid, timestamp_id, amount):
+    if not amount:
+        return
     cursor.execute("""
         INSERT INTO RPM (User_Id, amount, timestamp_id)
         VALUES (%s, %s, %s);
