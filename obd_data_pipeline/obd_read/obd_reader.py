@@ -1,190 +1,105 @@
 import obd
 import sys
-from typing import Optional
+import logging
+from typing import Optional, List
 
-class Obd_reader:
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+class ObdReader:
     def __init__(self, connection: obd.OBD) -> None:
+        if not isinstance(connection, obd.OBD):
+            raise TypeError("Connection must be an instance of obd.OBD.")
+        
         self.connection = connection
+        
+        if not self.connection.is_connected():
+            logging.error("OBD connection is not active.")
+            raise ConnectionError("OBD connection is not active.")
+
+    def query_obd(self, command: obd.commands.OBDCommand) -> Optional[obd.OBDResponse]:
+        try:
+            if not self.connection.supports(command):
+                logging.warning(f"{command.name} command not supported by this vehicle.")
+                return None
+            
+            response = self.connection.query(command)
+            
+            if response.is_null():
+                logging.warning(f"Failed to retrieve data for {command.name}.")
+                return None
+            
+            return response
+        
+        except Exception as e:
+            logging.error(f"Error querying {command.name}: {e}")
+            return None
 
     def get_battery_voltage(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.ELM_VOLTAGE):
-            print("Battery Voltage command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.ELM_VOLTAGE)
-        
-        if response.is_null():
-            print("Failed to retrieve Battery Voltage data.")
-            return None
-        
-        voltage_value = response.value.magnitude  # Battery voltage in volts
-        return voltage_value
+        response = self.query_obd(obd.commands.ELM_VOLTAGE)
+        return response.value.magnitude if response else None
 
     def get_coolant_temp(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.COOLANT_TEMP):
-            print("Coolant Temperature command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.COOLANT_TEMP)
-        
-        if response.is_null():
-            print("Failed to retrieve Coolant Temperature data.")
-            return None
-        
-        coolant_temp_value = response.value.to("degC").magnitude  # Convert to degrees Celsius
-        return coolant_temp_value
+        response = self.query_obd(obd.commands.COOLANT_TEMP)
+        return response.value.to("degC").magnitude if response else None
 
     def get_diagnostic_codes(self) -> Optional[List[str]]:
-        # Check if the DTC command is supported
-        if not self.connection.supports(obd.commands.GET_DTC):
-            print("DTC command not supported by this vehicle.")
-            return None
+        response = self.query_obd(obd.commands.GET_DTC)
         
-        # Query the vehicle for stored DTCs
-        response = self.connection.query(obd.commands.GET_DTC)
-        
-        # Check if the response is valid
-        if response.is_null():
-            print("Failed to retrieve diagnostic codes.")
-            return None
-        
-        # Extract the DTCs from the response
-        dtc_list = response.value  # This is a list of tuples, each containing the DTC code and its description
-        
-        # Format the DTCs into a list of strings for easier display
-        formatted_dtc_list = [f"{dtc[0]}: {dtc[1]}" for dtc in dtc_list]
-        
-        if not formatted_dtc_list:
-            print("No diagnostic trouble codes found.")
-            return None
-        
-        return formatted_dtc_list
+        if response:
+            dtc_list = response.value
+            formatted_dtc_list = [f"{dtc[0]}: {dtc[1]}" for dtc in dtc_list]
+            if not formatted_dtc_list:
+                logging.info("No diagnostic trouble codes found.")
+                return None
+            return formatted_dtc_list
+        return None
 
     def get_fuel_cons(self) -> Optional[float]:
         try:
-            # Query the OBD-II system for speed and MAF data
-            speed_response = self.connection.query(obd.commands.SPEED)
-            maf_response = self.connection.query(obd.commands.MAF)
+            speed_response = self.query_obd(obd.commands.SPEED)
+            maf_response = self.query_obd(obd.commands.MAF)
 
-            if not speed_response.is_null() and not maf_response.is_null():
+            if speed_response and maf_response:
                 speed_kmh = speed_response.value.to("km/h").magnitude
                 maf_magnitude = maf_response.value.magnitude
 
-                # Calculate fuel consumption
                 air_fuel_ratio = 14.7
                 fuel_cons_g_per_s = maf_magnitude / air_fuel_ratio
-
-                # Calculate fuel consumption in grams per 100 km
                 fuel_cons_g_per_100km = (fuel_cons_g_per_s * 3600 * 100) / speed_kmh
-                # Convert grams to liters (density of gasoline ~735.5 g/L)
                 fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5
 
                 return fuel_cons_l_per_100km
             else:
-                print("Failed to retrieve speed or MAF data.", file=sys.stderr)
+                logging.warning("Failed to retrieve speed or MAF data.")
         except Exception as e:
-            print(f"Failed to get fuel consumption data: {e}", file=sys.stderr)
+            logging.error(f"Failed to calculate fuel consumption: {e}")
         return None
 
     def get_fuel_level(self) -> Optional[float]:
-        try:
-            cmd = obd.commands.FUEL_LEVEL
-            res = self.connection.query(cmd)
-            if res.value:
-                return res.value.magnitude  # The fuel level as a percentage
-        except Exception as e:
-            print(f"Failed to get fuel level: {e}", file=sys.stderr)
-        return None
+        response = self.query_obd(obd.commands.FUEL_LEVEL)
+        return response.value.magnitude if response else None
 
     def get_intake_manifold_pressure(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.INTAKE_PRESSURE):
-            print("Intake Manifold Pressure command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.INTAKE_PRESSURE)
-        
-        if response.is_null():
-            print("Failed to retrieve Intake Manifold Pressure data.")
-            return None
-        
-        pressure_value = response.value.to("kPa").magnitude  # Convert to kPa
-        return pressure_value
+        response = self.query_obd(obd.commands.INTAKE_PRESSURE)
+        return response.value.to("kPa").magnitude if response else None
 
     def get_maf(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.MAF):
-            print("MAF command not supported by this vehicle.")
-            return None
-        
-        # Query the MAF sensor
-        response = self.connection.query(obd.commands.MAF)
-        
-        # Check if the response is valid
-        if response.is_null():
-            print("Failed to retrieve MAF data.")
-            return None
-        
-        # Extract the MAF value in grams per second
-        maf_value = response.value.to("g/s").magnitude
-        return maf_value
+        response = self.query_obd(obd.commands.MAF)
+        return response.value.to("g/s").magnitude if response else None
 
     def get_oxygen_sensor(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.O2_B1S1):
-            print("Oxygen Sensor (Bank 1, Sensor 1) command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.O2_B1S1)
-        
-        if response.is_null():
-            print("Failed to retrieve Oxygen Sensor data.")
-            return None
-        
-        oxygen_value = response.value.magnitude  # Typically in volts
-        return oxygen_value
+        response = self.query_obd(obd.commands.O2_B1S1)
+        return response.value.magnitude if response else None
 
     def get_rpm(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.RPM):
-            print("RPM command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.RPM)
-        
-        if response.is_null():
-            print("Failed to retrieve RPM data.")
-            return None
-        
-        rpm_value = response.value.magnitude  # RPM is typically returned as a simple numeric value
-        return rpm_value
+        response = self.query_obd(obd.commands.RPM)
+        return response.value.magnitude if response else None
 
     def get_speed(self) -> Optional[float]:
-        try:
-            cmd = obd.commands.SPEED
-            res = self.connection.query(cmd)
-            if res.value:
-                return res.value.to('kmh').magnitude
-
-        except Exception as e:
-            print(f"Failed to get speed: {e}", file=sys.stdin)
-        return None
+        response = self.query_obd(obd.commands.SPEED)
+        return response.value.to('kmh').magnitude if response else None
 
     def get_throttle_position(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.THROTTLE_POS):
-            print("Throttle Position command not supported by this vehicle.")
-            return None
-        
-        response = self.connection.query(obd.commands.THROTTLE_POS)
-        
-        if response.is_null():
-            print("Failed to retrieve Throttle Position data.")
-            return None
-        
-        throttle_value = response.value.magnitude  # Throttle position as a percentage
-        return throttle_value
-
-
-
-
-
-
-
-
-        
+        response = self.query_obd(obd.commands.THROTTLE_POS)
+        return response.value.magnitude if response else None
