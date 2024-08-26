@@ -1,4 +1,3 @@
-import obd
 from itertools import cycle
 
 class FakeOBD:
@@ -33,12 +32,15 @@ class FakeOBD:
     def is_connected(self):
         return True
 
+    def close(self):
+        return True
+
     def supports(self, command):
         command_name = command.name if hasattr(command, 'name') else str(command)
         return self.supported_commands.get(command_name, False)
 
     def query(self, command):
-        # Return a mocked response object with a `value` attribute
+        # Adjust the FakeResponse class to properly mimic the real OBD response structure
         class FakeResponse:
             def __init__(self, value):
                 self.value = value
@@ -56,6 +58,16 @@ class FakeOBD:
                 # For simplicity, assume no unit conversion is needed
                 return self
 
+        class FakeValue:
+            def __init__(self, magnitude):
+                self.magnitude = magnitude
+
+            def to(self, unit):
+                return self  # Assume no unit conversion needed for simplicity
+
         command_name = command.name if hasattr(command, 'name') else str(command)
-        # Cycle through the values for each command
-        return FakeResponse(next(self.fake_responses.get(command_name)))
+        # Cycle through the values for each command and wrap them in FakeValue
+        response_value = next(self.fake_responses.get(command_name))
+        if isinstance(response_value, list):  # For DTC codes, directly return the list
+            return FakeResponse(response_value)
+        return FakeResponse(FakeValue(response_value))

@@ -7,17 +7,14 @@ from typing import Optional, List
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class ObdReader:
-    def __init__(self, connection: obd.OBD) -> None:
-        if not isinstance(connection, obd.OBD):
-            raise TypeError("Connection must be an instance of obd.OBD.")
-        
+    def __init__(self, connection) -> None:
         self.connection = connection
         
         if not self.connection.is_connected():
             logging.error("OBD connection is not active.")
             raise ConnectionError("OBD connection is not active.")
 
-    def query_obd(self, command: obd.commands.OBDCommand) -> Optional[obd.OBDResponse]:
+    def query_obd(self, command) -> Optional[obd.OBDResponse]:
         try:
             if not self.connection.supports(command):
                 logging.warning(f"{command.name} command not supported by this vehicle.")
@@ -50,7 +47,7 @@ class ObdReader:
             dtc_list = response.value
             formatted_dtc_list = [f"{dtc[0]}: {dtc[1]}" for dtc in dtc_list]
             if not formatted_dtc_list:
-                logging.info("No diagnostic trouble codes found.")
+                logging.debug("No diagnostic trouble codes found.")  # Changed to DEBUG level
                 return None
             return formatted_dtc_list
         return None

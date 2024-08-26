@@ -5,7 +5,7 @@ import time
 from buffer.buffer import Buffer
 from obd_read.obd_reader import ObdReader
 from data_writer.database_writer import DatabaseWriter
-from test.fakeObd import FakeOBD
+from test.fake_obd import FakeOBD
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -16,11 +16,9 @@ def main(connection=None):
         if not connection.is_connected():
             logging.error("Failed to connect to OBD-II adapter.")
             return
-
+        
         reader = ObdReader(connection)
         buff = Buffer()
-        writer = DatabaseWriter(dbname="your_db", user="your_user", password="your_pass", userid=1)
-
         before_time = datetime.now()
 
         while True:
@@ -44,10 +42,14 @@ def main(connection=None):
             current_time = datetime.now()
             if current_time - before_time >= timedelta(minutes=1):
                 averages = buff.give_average_of_data()
+                writer = DatabaseWriter(dbname="car_data", user="mitchellbreust", password="your_pass", userid=1)
+
                 writer.insert_new_data(before_time, averages)
 
                 before_time = current_time
                 buff.clear_buffer()
+
+                print(f"Wrote to db: {averages}")
 
             time.sleep(0.5)
 
@@ -59,7 +61,7 @@ def main(connection=None):
             logging.info("OBD-II connection closed.")
 
 if __name__ == "__main__":
-    if input(str("Test? ")) == "yes":
+    if input(str("Test? ")) == "yes".lower():
         fake_connection = FakeOBD()
         main(connection=fake_connection)
     else:
