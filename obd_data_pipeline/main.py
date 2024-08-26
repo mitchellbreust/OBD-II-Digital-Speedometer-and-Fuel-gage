@@ -1,24 +1,25 @@
 import obd
+import logging
 from datetime import datetime, timedelta
 import time
 from buffer.buffer import Buffer
-from obd_read.obd_reader import ObdReader  # Fixed class name capitalization
-from data_writer.database_writer import DatabaseWriter  # Fixed class name capitalization
-from typing import Optional
-import logging
+from obd_read.obd_reader import ObdReader
+from data_writer.database_writer import DatabaseWriter
+from test.fakeObd import FakeOBD
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def main():
+def main(connection=None):
     try:
-        connection = obd.OBD()
+        # Use the provided connection or default to a real OBD connection
+        connection = connection or obd.OBD()
         if not connection.is_connected():
             logging.error("Failed to connect to OBD-II adapter.")
             return
 
         reader = ObdReader(connection)
         buff = Buffer()
-        writer = DatabaseWriter()
+        writer = DatabaseWriter(dbname="your_db", user="your_user", password="your_pass", userid=1)
 
         before_time = datetime.now()
 
@@ -37,14 +38,12 @@ def main():
                 'diagnostic_codes': reader.get_diagnostic_codes()
             }
 
-            # Filter out None values
             filtered_data = {k: v for k, v in data.items() if v is not None}
             buff.update_buffer(filtered_data)
 
             current_time = datetime.now()
             if current_time - before_time >= timedelta(minutes=1):
                 averages = buff.give_average_of_data()
-                diagnostic_codes = buff.get_diagnostic_codes()
                 writer.insert_new_data(before_time, averages)
 
                 before_time = current_time
@@ -60,4 +59,8 @@ def main():
             logging.info("OBD-II connection closed.")
 
 if __name__ == "__main__":
-    main()
+    if input(str("Test? ")) == "yes":
+        fake_connection = FakeOBD()
+        main(connection=fake_connection)
+    else:
+        main()
