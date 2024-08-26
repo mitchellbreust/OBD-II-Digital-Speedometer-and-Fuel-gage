@@ -42,7 +42,7 @@ def main(connection=None):
             current_time = datetime.now()
             if current_time - before_time >= timedelta(minutes=1):
                 averages = buff.give_average_of_data()
-                writer = DatabaseWriter(dbname="car_data", user="mitchellbreust", password="your_pass", userid=1)
+                writer = DatabaseWriter(dbname="car_data", user="mitchellbreust", userid=1)
 
                 writer.insert_new_data(before_time, averages)
 
@@ -61,7 +61,7 @@ def main(connection=None):
             logging.info("OBD-II connection closed.")
 
 if __name__ == "__main__":
-    if input(str("Test? ")) == "yes".lower():
+    if input(str("Test? ")).lower() == "yes":
         fake_connection = FakeOBD()
         main(connection=fake_connection)
     else:

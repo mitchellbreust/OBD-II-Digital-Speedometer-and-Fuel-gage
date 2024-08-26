@@ -125,4 +125,3 @@ JOIN
     timestamps t ON r.timestamp_id = t.id
 ORDER BY 
     u.id, t.timestamp;
-

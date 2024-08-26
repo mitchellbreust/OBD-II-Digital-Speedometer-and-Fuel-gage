@@ -1,4 +1,4 @@
-from itertools import cycle
+import random
 
 class FakeOBD:
     def __init__(self):
@@ -15,18 +15,25 @@ class FakeOBD:
             'GET_DTC': True,
         }
 
-        # Define cycling values for each command
+        # Define possible random values for each command
         self.fake_responses = {
-            'ELM_VOLTAGE': cycle([12.4, 12.5, 12.6, 12.7]),
-            'COOLANT_TEMP': cycle([85.0, 88.0, 90.0, 92.0]),
-            'RPM': cycle([1500, 2000, 2500, 3000]),
-            'SPEED': cycle([60.0, 70.0, 80.0, 90.0]),
-            'MAF': cycle([1.8, 2.0, 2.2, 2.4]),
-            'O2_B1S1': cycle([0.7, 0.8, 0.9, 1.0]),
-            'THROTTLE_POS': cycle([20.0, 25.0, 30.0, 35.0]),
-            'INTAKE_PRESSURE': cycle([95.0, 100.0, 105.0, 110.0]),
-            'FUEL_LEVEL': cycle([45.0, 50.0, 55.0, 60.0]),
-            'GET_DTC': cycle([[], [('P0300', 'Random/Multiple Cylinder Misfire Detected')]]),
+            'ELM_VOLTAGE': [12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.0, 13.1, 13.2, 13.3],
+            'COOLANT_TEMP': [85.0, 88.0, 90.0, 92.0, 93.0, 95.0, 96.0, 98.0, 100.0],
+            'RPM': [1500, 2000, 2500, 3000, 3200, 3400, 3600, 3800, 4000, 4200],
+            'SPEED': [60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0],
+            'MAF': [1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6],
+            'O2_B1S1': [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5],
+            'THROTTLE_POS': [20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0, 60.0],
+            'INTAKE_PRESSURE': [95.0, 100.0, 105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0],
+            'FUEL_LEVEL': [45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 75.0, 80.0, 85.0],
+            'GET_DTC': [
+                [],
+                [('P0300', 'Random/Multiple Cylinder Misfire Detected')],
+                [('P0130', 'O2 Sensor Circuit Malfunction')],
+                [('P0171', 'System Too Lean')],
+                [('P0420', 'Catalyst System Efficiency Below Threshold')],
+                [('P0440', 'Evaporative Emission Control System Malfunction')]
+            ],
         }
 
     def is_connected(self):
@@ -66,8 +73,8 @@ class FakeOBD:
                 return self  # Assume no unit conversion needed for simplicity
 
         command_name = command.name if hasattr(command, 'name') else str(command)
-        # Cycle through the values for each command and wrap them in FakeValue
-        response_value = next(self.fake_responses.get(command_name))
+        # Randomly select a value from the list of possible responses
+        response_value = random.choice(self.fake_responses.get(command_name))
         if isinstance(response_value, list):  # For DTC codes, directly return the list
             return FakeResponse(response_value)
         return FakeResponse(FakeValue(response_value))

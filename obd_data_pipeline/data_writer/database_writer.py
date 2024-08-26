@@ -80,21 +80,21 @@ class DatabaseWriter:
     def _insert_rpm(self, cursor, timestamp_id, rpm):
         if rpm is not None:
             cursor.execute("""
-                INSERT INTO RPM (User_Id, rpm, timestamp_id)
+                INSERT INTO RPM (User_Id, amount, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, rpm, timestamp_id))
 
     def _insert_coolant(self, cursor, timestamp_id, coolant):
         if coolant is not None:
             cursor.execute("""
-                INSERT INTO Coolant (User_Id, coolant_temp, timestamp_id)
+                INSERT INTO Coolant (User_Id, temp, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, coolant, timestamp_id))
 
     def _insert_intake_manifold(self, cursor, timestamp_id, intake_manifold):
         if intake_manifold is not None:
             cursor.execute("""
-                INSERT INTO Intake_manifold (User_Id, pressure, timestamp_id)
+                INSERT INTO Intake_manifold (User_Id, level, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, intake_manifold, timestamp_id))
 
@@ -115,13 +115,13 @@ class DatabaseWriter:
     def _insert_speed(self, cursor, timestamp_id, speed):
         if speed is not None:
             cursor.execute("""
-                INSERT INTO Speed (User_Id, speed, timestamp_id)
+                INSERT INTO Speed_kph (User_Id, speed, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, speed, timestamp_id))
 
     def _insert_throttle(self, cursor, timestamp_id, throttle):
         if throttle is not None:
             cursor.execute("""
-                INSERT INTO Throttle (User_Id, throttle_pos, timestamp_id)
+                INSERT INTO Throttle (User_Id, position, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, throttle, timestamp_id))
