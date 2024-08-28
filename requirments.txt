@@ -2,3 +2,4 @@ obd
 psycopg2-binary
 Flask
 numpy
+plotly
