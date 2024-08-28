@@ -18,6 +18,10 @@ This project leverages an embedded system to create a dual-function vehicle dash
 - **Portable Power**: Capable of running on a battery pack for portability.
 - **Flexible Display Options**: Data is displayed on both the device's built-in screen and the web interface.
 
+## Future Features
+
+- **Aiming to add AI systemn to detect anomolies**
+
 ## Software Components
 - **Data Management:** Uses PostgreSQL to store and manage vehicle data, enabling complex queries and data integrity.
 - **Python Data Handling:** Maintains a live connection to the car's OBD-II system to retrieve data and perform initial analysis before serving it to the digvital display and storing it in PostgreSQL (which is further supported by a data buffer)]
