@@ -12,7 +12,7 @@ def main():
         data_access = DataAccess(user_id=user_id)
 
         # Fetch speed data
-        timestamps, speed_data = data_access.get_rpm()
+        timestamps, speed_data, timestamps_resampled, speed_data_resampled = data_access.get_rpm()
 
         # Check if data was retrieved successfully
         if timestamps is not None and speed_data is not None:
@@ -21,17 +21,35 @@ def main():
             # Create a Plotly line plot
             fig = go.Figure()
 
-            fig.add_trace(go.Scatter(
+            # Plot resampled data (less dense)
+            fig.add_trace(go.Scattergl(
+                x=timestamps_resampled,
+                y=speed_data_resampled,
+                mode='lines+markers',
+                marker=dict(size=3),
+                line=dict(width=1),
+                name='Speed (Resampled)'
+            ))
+
+            # Keep the original, dense data in a hidden trace for zooming
+            fig.add_trace(go.Scattergl(
                 x=timestamps,
                 y=speed_data,
                 mode='lines+markers',
-                name='Speed'
+                marker=dict(size=1),  # Smaller markers for detailed data
+                line=dict(width=1),
+                name='Speed (Full Data)',
+                visible='legendonly'  # Hide by default, reveal on zoom
             ))
 
             fig.update_layout(
-                title='Vehicle coolant Over Time',
+                title='Vehicle Speed Over Time',
                 xaxis_title='Time',
-                yaxis_title='Coolant temp'
+                yaxis_title='Speed (km/h)',
+                xaxis=dict(showspikes=True, spikecolor="green", spikethickness=1),
+                yaxis=dict(showspikes=True, spikecolor="orange", spikethickness=1),
+                hovermode="x unified",
+                autosize=True
             )
 
             # Show the plot

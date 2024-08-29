@@ -1,6 +1,8 @@
 import psycopg2
 import logging
 import numpy as np
+import pandas as pd
+from datetime import timedelta
 
 class DataAccess:
     def __init__(self, user_id) -> None:
@@ -39,7 +41,34 @@ class DataAccess:
             finally:
                 self.connection = None
 
-    def _execute_query(self, query, params):
+    def get_speed(self, data_interval):
+        return self._execute_query("SELECT * FROM UserSpeed WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_fuel_level(self, data_interval):
+        return self._execute_query("SELECT * FROM UserFuelLevel WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_fuel_cons(self, data_interval):
+        return self._execute_query("SELECT * FROM UserFuelConsumption WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_maf(self, data_interval):
+        return self._execute_query("SELECT * FROM UserMassAirFlow WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_oxygen(self, data_interval):
+        return self._execute_query("SELECT * FROM UserOxygenLevel WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_throttle(self, data_interval):
+        return self._execute_query("SELECT * FROM UserThrottlePosition WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_coolant(self, data_interval):
+        return self._execute_query("SELECT * FROM UserCoolantTemperature WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_intake_manifold(self, data_interval):
+        return self._execute_query("SELECT * FROM UserIntakeManifoldLevel WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def get_rpm(self, data_interval):
+        return self._execute_query("SELECT * FROM UserRPM WHERE User_Id = %s", (self.user_id,), data_interval)
+
+    def _execute_query(self, query, params, interval):
         if not self.cur:
             logging.error("Cursor is not initialized.")
             return None, None
@@ -55,7 +84,21 @@ class DataAccess:
             timestamps = np.array(timestamps)
             data = np.array(data)
 
-            return timestamps, data
+            # Convert timestamps to a Pandas datetime index
+            timestamps = pd.to_datetime(timestamps)
+
+            # Determine the resample interval
+
+            # Create a DataFrame and resample the data
+            df = pd.DataFrame({'timestamp': timestamps, 'data': data})
+            df.set_index('timestamp', inplace=True)
+            df_resampled = df.resample(interval).mean().dropna()
+
+            # Get the resampled timestamps and data
+            timestamps_resampled = df_resampled.index.to_numpy()
+            data_resampled = df_resampled['data'].to_numpy()
+
+            return timestamps_resampled, data_resampled
         except psycopg2.DatabaseError as e:
             logging.error(f"Database error during query execution: {e}")
             if self.connection:
@@ -64,30 +107,3 @@ class DataAccess:
         except Exception as e:
             logging.error(f"Unexpected error during query execution: {e}")
             return None, None
-
-    def get_speed(self):
-        return self._execute_query("SELECT * FROM UserSpeed WHERE User_Id = %s", (self.user_id,))
-
-    def get_fuel_level(self):
-        return self._execute_query("SELECT * FROM UserFuelLevel WHERE User_Id = %s", (self.user_id,))
-
-    def get_fuel_cons(self):
-        return self._execute_query("SELECT * FROM UserFuelConsumption WHERE User_Id = %s", (self.user_id,))
-
-    def get_maf(self):
-        return self._execute_query("SELECT * FROM UserMassAirFlow WHERE User_Id = %s", (self.user_id,))
-
-    def get_oxygen(self):
-        return self._execute_query("SELECT * FROM UserOxygenLevel WHERE User_Id = %s", (self.user_id,))
-
-    def get_throttle(self):
-        return self._execute_query("SELECT * FROM UserThrottlePosition WHERE User_Id = %s", (self.user_id,))
-
-    def get_coolant(self):
-        return self._execute_query("SELECT * FROM UserCoolantTemperature WHERE User_Id = %s", (self.user_id,))
-
-    def get_intake_manifold(self):
-        return self._execute_query("SELECT * FROM UserIntakeManifoldLevel WHERE User_Id = %s", (self.user_id,))
-
-    def get_rpm(self):
-        return self._execute_query("SELECT * FROM UserRPM WHERE User_Id = %s", (self.user_id,))
