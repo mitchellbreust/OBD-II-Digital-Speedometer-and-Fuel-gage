@@ -33,34 +33,37 @@ class ObdReader:
             return None
 
     def get_battery_voltage(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.ELM_VOLTAGE):
+            return None
         response = self.query_obd(obd.commands.ELM_VOLTAGE)
         return response.value.magnitude if response else None
 
     def get_coolant_temp(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.COOLANT_TEMP):
+            return None
         response = self.query_obd(obd.commands.COOLANT_TEMP)
         return response.value.to("degC").magnitude if response else None
 
     def get_diagnostic_codes(self) -> Optional[List[str]]:
+        if not self.connection.supports(obd.commands.GET_DTC):
+            return None
         response = self.query_obd(obd.commands.GET_DTC)
         if response and response.value:
-            # Check the type of response.value and handle accordingly
             if isinstance(response.value, list):
                 if all(isinstance(item, str) for item in response.value):
-                    # If it's a list of strings, return as is
                     return response.value
                 else:
-                    # If it's a list of something else (e.g., tuples), handle as needed
-                    return [str(item) for item in response.value]  # Convert items to strings
+                    return [str(item) for item in response.value]
             elif isinstance(response.value, str):
-                # If it's a single string, return it as a list with one item
                 return [response.value]
             else:
                 logging.warning(f"Unexpected type for response.value: {type(response.value)}")
                 return None
         return None
 
-
     def get_fuel_cons(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.SPEED) or not self.connection.supports(obd.commands.MAF):
+            return None
         try:
             speed_response = self.query_obd(obd.commands.SPEED)
             maf_response = self.query_obd(obd.commands.MAF)
@@ -82,29 +85,49 @@ class ObdReader:
         return None
 
     def get_fuel_level(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.FUEL_LEVEL):
+            return None
         response = self.query_obd(obd.commands.FUEL_LEVEL)
         return response.value.magnitude if response else None
 
     def get_intake_manifold_pressure(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.INTAKE_PRESSURE):
+            return None
         response = self.query_obd(obd.commands.INTAKE_PRESSURE)
         return response.value.to("kPa").magnitude if response else None
 
     def get_maf(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.MAF):
+            return None
         response = self.query_obd(obd.commands.MAF)
         return response.value.to("g/s").magnitude if response else None
 
     def get_oxygen_sensor(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.O2_B1S1):
+            return None
         response = self.query_obd(obd.commands.O2_B1S1)
         return response.value.magnitude if response else None
 
     def get_rpm(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.RPM):
+            return None
         response = self.query_obd(obd.commands.RPM)
         return response.value.magnitude if response else None
 
     def get_speed(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.SPEED):
+            return None
         response = self.query_obd(obd.commands.SPEED)
-        return response.value.to('kmh').magnitude if response else None
+        if response and response.value:
+            try:
+                return float(response.value.magnitude)
+            except Exception as e:
+                logging.error(f"Error retrieving speed: {e}")
+                return None
+        return None
 
     def get_throttle_position(self) -> Optional[float]:
+        if not self.connection.supports(obd.commands.THROTTLE_POS):
+            return None
         response = self.query_obd(obd.commands.THROTTLE_POS)
         return response.value.magnitude if response else None
