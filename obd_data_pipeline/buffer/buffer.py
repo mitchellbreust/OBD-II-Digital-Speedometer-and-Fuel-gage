@@ -65,14 +65,16 @@ class Buffer:
         # Calculate and return the average of each numeric data type
         averages: Dict[str, Optional[float]] = {}
         for key, values in self.data.items():
-            if values and key != 'diagnostic_codes':
-                if isinstance(values[0], (int, float)):  # Ensure the list contains numeric values
-                    averages[key] = sum(values) / len(values)
+            if values:  # Ensure that the values list is not empty or None
+                if key != 'diagnostic_codes' and isinstance(values[0], (int, float)):
+                    averages[key] = sum(values) / len(values) if values else None
+                elif key == 'diagnostic_codes':
+                    averages[key] = values
                 else:
-                    logging.warning(f"Non-numeric data encountered for {key}. Skipping average calculation.")
+                    logging.info(f"No valid data for average calculation for {key}.")
                     averages[key] = None
             else:
-                logging.info(f"No valid data for average calculation for {key}.")
+                logging.info(f"No data available for {key}.")
                 averages[key] = None
         return averages
 

@@ -12,7 +12,7 @@ def main():
         data_access = DataAccess(user_id=user_id)
 
         # Fetch speed data
-        timestamps, speed_data = data_access.get_speed()
+        timestamps, speed_data = data_access.get_coolant()
 
         # Check if data was retrieved successfully
         if timestamps is not None and speed_data is not None:
@@ -29,9 +29,9 @@ def main():
             ))
 
             fig.update_layout(
-                title='Vehicle Speed Over Time',
+                title='Vehicle coolant Over Time',
                 xaxis_title='Time',
-                yaxis_title='Speed (km/h)'
+                yaxis_title='Coolant temp'
             )
 
             # Show the plot
