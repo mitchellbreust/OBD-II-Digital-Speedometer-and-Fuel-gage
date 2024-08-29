@@ -70,3 +70,17 @@ CREATE TABLE RPM (
     amount FLOAT NOT NULL,
     timestamp_id INT REFERENCES timestamps(id)
 );
+
+CREATE TABLE DC (
+    id SERIAL PRIMARY KEY,
+    User_Id INT REFERENCES Users(id),
+    code TEXT NOT NULL,
+    timestamp_id INT REFERENCES timestamps(id)
+);
+
+CREATE TABLE voltage (
+    id SERIAL PRIMARY KEY,
+    User_Id INT REFERENCES Users(id),
+    volt TEXT NOT NULL,
+    timestamp_id INT REFERENCES timestamps(id)
+);

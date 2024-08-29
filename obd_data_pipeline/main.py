@@ -42,14 +42,15 @@ def main(connection=None):
             current_time = datetime.now()
             if current_time - before_time >= timedelta(minutes=1):
                 averages = buff.give_average_of_data()
-                writer = DatabaseWriter(dbname="car_data", user="mitchellbreust", userid=1)
+                diagnostics = buff.get_diagnostic_codes()
+                if diagnostics:
+                    averages['diagnostic_codes'] = diagnostics
 
+                writer = DatabaseWriter(dbname="car_data", user="mitchellbreust", userid=1)
                 writer.insert_new_data(before_time, averages)
 
                 before_time = current_time
                 buff.clear_buffer()
-
-                print(f"Wrote to db: {averages}")
 
             time.sleep(0.5)
 

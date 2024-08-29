@@ -42,15 +42,23 @@ class ObdReader:
 
     def get_diagnostic_codes(self) -> Optional[List[str]]:
         response = self.query_obd(obd.commands.GET_DTC)
-        
-        if response:
-            dtc_list = response.value
-            formatted_dtc_list = [f"{dtc[0]}: {dtc[1]}" for dtc in dtc_list]
-            if not formatted_dtc_list:
-                logging.debug("No diagnostic trouble codes found.")  # Changed to DEBUG level
+        if response and response.value:
+            # Check the type of response.value and handle accordingly
+            if isinstance(response.value, list):
+                if all(isinstance(item, str) for item in response.value):
+                    # If it's a list of strings, return as is
+                    return response.value
+                else:
+                    # If it's a list of something else (e.g., tuples), handle as needed
+                    return [str(item) for item in response.value]  # Convert items to strings
+            elif isinstance(response.value, str):
+                # If it's a single string, return it as a list with one item
+                return [response.value]
+            else:
+                logging.warning(f"Unexpected type for response.value: {type(response.value)}")
                 return None
-            return formatted_dtc_list
         return None
+
 
     def get_fuel_cons(self) -> Optional[float]:
         try:

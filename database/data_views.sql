@@ -125,3 +125,31 @@ JOIN
     timestamps t ON r.timestamp_id = t.id
 ORDER BY 
     u.id, t.timestamp;
+
+CREATE VIEW UserDiagnosticCodes AS
+SELECT 
+    u.id AS user_id,
+    t.timestamp,
+    dc.code AS diagnostic_code
+FROM 
+    Users u
+JOIN 
+    DC dc ON u.id = dc.User_Id
+JOIN 
+    timestamps t ON dc.timestamp_id = t.id
+ORDER BY 
+    u.id, t.timestamp;
+
+CREATE VIEW UserVoltage AS
+SELECT 
+    u.id AS user_id,
+    t.timestamp,
+    v.volt AS voltage_value
+FROM 
+    Users u
+JOIN 
+    voltage v ON u.id = v.User_Id
+JOIN 
+    timestamps t ON v.timestamp_id = t.id
+ORDER BY 
+    u.id, t.timestamp;

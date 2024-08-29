@@ -42,7 +42,8 @@ class DatabaseWriter:
             self._insert_oxygen(cursor, timestamp_id, data.get('oxygen'))
             self._insert_speed(cursor, timestamp_id, data.get('speed'))
             self._insert_throttle(cursor, timestamp_id, data.get('throttle'))
-            # Additional insertions for battery and diagnostic codes can be added here
+            self._insert_diagnostic_codes(cursor, timestamp_id, data.get('diagnostic_codes'))
+            self._insert_voltage(cursor, timestamp_id, data.get('battery'))
 
             connection.commit()
             logging.info(f"Data committed to the database at {timestamp_str}.")
@@ -125,3 +126,20 @@ class DatabaseWriter:
                 INSERT INTO Throttle (User_Id, position, timestamp_id)
                 VALUES (%s, %s, %s);
             """, (self.userid, throttle, timestamp_id))
+
+    def _insert_diagnostic_codes(self, cursor, timestamp_id, diagnostic_codes):
+        if diagnostic_codes:
+            for code in diagnostic_codes:
+                cursor.execute("""
+                    INSERT INTO DC (User_Id, code, timestamp_id)
+                    VALUES (%s, %s, %s);
+                """, (self.userid, code, timestamp_id))
+
+    def _insert_voltage(self, cursor, timestamp_id, voltage_value):
+        if voltage_value is not None:
+            cursor.execute("""
+                INSERT INTO voltage (User_Id, volt, timestamp_id)
+                VALUES (%s, %s, %s);
+            """, (self.userid, voltage_value, timestamp_id))
+
+
