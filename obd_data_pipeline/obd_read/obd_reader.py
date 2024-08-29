@@ -62,26 +62,52 @@ class ObdReader:
         return None
 
     def get_fuel_cons(self) -> Optional[float]:
-        if not self.connection.supports(obd.commands.SPEED) or not self.connection.supports(obd.commands.MAF):
-            return None
-        try:
-            speed_response = self.query_obd(obd.commands.SPEED)
-            maf_response = self.query_obd(obd.commands.MAF)
+        # First attempt using FUEL_RATE directly
+        if self.connection.supports(obd.commands.FUEL_RATE):
+            try:
+                fuel_rate_response = self.query_obd(obd.commands.FUEL_RATE)
 
-            if speed_response and maf_response:
-                speed_kmh = speed_response.value.to("km/h").magnitude
-                maf_magnitude = maf_response.value.magnitude
+                if fuel_rate_response:
+                    fuel_rate = fuel_rate_response.value.to("L/h").magnitude  # Fuel rate in liters per hour
 
-                air_fuel_ratio = 14.7
-                fuel_cons_g_per_s = maf_magnitude / air_fuel_ratio
-                fuel_cons_g_per_100km = (fuel_cons_g_per_s * 3600 * 100) / speed_kmh
-                fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5
+                    speed_response = self.query_obd(obd.commands.SPEED)
+                    if speed_response:
+                        speed_kmh = speed_response.value.to("km/h").magnitude
+                    else:
+                        speed_kmh = 60  # Assume an average speed of 60 km/h if SPEED is not available
 
-                return fuel_cons_l_per_100km
-            else:
-                logging.warning("Failed to retrieve speed or MAF data.")
-        except Exception as e:
-            logging.error(f"Failed to calculate fuel consumption: {e}")
+                    # Calculate fuel consumption per 100 km
+                    fuel_cons_l_per_100km = (fuel_rate / speed_kmh) * 100
+
+                    return fuel_cons_l_per_100km
+                else:
+                    logging.warning("Failed to retrieve FUEL_RATE data.")
+            except Exception as e:
+                logging.error(f"Failed to calculate fuel consumption using FUEL_RATE: {e}")
+
+        # Fallback method using SPEED and MAF
+        if self.connection.supports(obd.commands.SPEED) and self.connection.supports(obd.commands.MAF):
+            try:
+                speed_response = self.query_obd(obd.commands.SPEED)
+                maf_response = self.query_obd(obd.commands.MAF)
+
+                if speed_response and maf_response:
+                    speed_kmh = speed_response.value.to("km/h").magnitude
+                    maf_magnitude = maf_response.value.magnitude
+
+                    air_fuel_ratio = 14.7
+                    fuel_cons_g_per_s = maf_magnitude / air_fuel_ratio
+                    fuel_cons_g_per_100km = (fuel_cons_g_per_s * 3600 * 100) / speed_kmh
+                    fuel_cons_l_per_100km = fuel_cons_g_per_100km / 735.5
+
+                    return fuel_cons_l_per_100km
+                else:
+                    logging.warning("Failed to retrieve speed or MAF data.")
+            except Exception as e:
+                logging.error(f"Failed to calculate fuel consumption using SPEED and MAF: {e}")
+
+        # If neither method works, return None
+        logging.error("Unable to calculate fuel consumption. Both methods failed or are unsupported.")
         return None
 
     def get_fuel_level(self) -> Optional[float]:
@@ -131,3 +157,15 @@ class ObdReader:
             return None
         response = self.query_obd(obd.commands.THROTTLE_POS)
         return response.value.magnitude if response else None
+
+    # Fuel rate coming soon
+
+    # Engine load coming soon
+
+    # Fuel pressure coming soon
+
+    # Short-Term Fuel Trim coming soon
+
+    # Air Intake Temperature coming soon
+
+    # Timing Advance coming soon 

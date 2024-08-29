@@ -11,16 +11,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 def main(connection=None):
     try:
-        #obd.logger.setLevel(obd.logging.DEBUG)
         # Use the provided connection or default to a real OBD connection
-        #connection = connection or obd.OBD()
-        connection = obd.OBD()  # auto-connects to USB or Bluetooth adapter
-
+        connection = connection or obd.OBD()
         if connection.is_connected():
             print("Connected to OBD-II adapter")
         else:
             connection = obd.OBD("/dev/ttyACM0")
-            print("Failed to connect to OBD-II adapter")
         if not connection.is_connected():
             logging.error("Failed to connect to OBD-II adapter.")
             return
