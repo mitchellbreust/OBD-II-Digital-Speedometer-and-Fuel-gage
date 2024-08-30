@@ -41,6 +41,20 @@ class DataAccess:
             finally:
                 self.connection = None
 
+    def _is_valid_user_id(self, user_id) -> bool:
+        try:
+            self.cur.execute("SELECT id FROM Users WHERE id = %s", (user_id,))
+            result = self.cur.fetchone()
+            return result is not None
+        except psycopg2.DatabaseError as e:
+            logging.error(f"Database error during user_id validation: {e}")
+            if self.connection:
+                    self.connection.rollback()
+                    raise
+        except Exception as e:
+            logging.error(f"Unexpected error during user_id validation: {e}")
+            raise
+
     def get_speed(self, data_interval):
         return self._execute_query("SELECT * FROM UserSpeed WHERE User_Id = %s", (self.user_id,), data_interval)
 

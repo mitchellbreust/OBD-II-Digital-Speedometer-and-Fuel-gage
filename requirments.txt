@@ -4,3 +4,4 @@ Flask
 numpy
 plotly
 pandas
+msgpack
