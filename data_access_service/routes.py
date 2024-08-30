@@ -1,6 +1,8 @@
 from flask import Flask
+from flask import Response
 from data_access import DataAccess
 from flask import abort, redirect, url_for
+import msgpack
 
 app = Flask(__name__)
 
@@ -20,6 +22,12 @@ def get_users_speed(user_id, interval):
             abort(400, description=f'invalid user id: {user_id}')
 
         timestamp, data = data_access.get_speed()
+
+        # Serialize the numpy arrays with MessagePack
+        packed_data = msgpack.packb({'timestamp': timestamp, 'data': data}, use_bin_type=True)
+
+        # Send the serialized data as a response
+        return Response(packed_data, content_type='application/x-msgpack')
         
     
     except:
