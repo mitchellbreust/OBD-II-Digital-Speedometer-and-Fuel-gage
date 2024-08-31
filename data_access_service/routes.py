@@ -2,6 +2,7 @@ from flask import Flask
 from flask import Response
 from data_access import DataAccess
 from flask import abort
+import numpy as np
 import msgpack
 import logging
 
@@ -11,7 +12,12 @@ def valid_interval(interval):
     return interval in ['5s', '30s', '2min', '30min', '2hours']
 
 def make_response(timestamp, data):
-    packed_data = msgpack.packb({'timestamp': timestamp, 'data': data}, use_bin_type=True)
+    # Convert NumPy arrays to lists for serialization
+    timestamp_list = timestamp.tolist() if isinstance(timestamp, np.ndarray) else timestamp
+    data_list = data.tolist() if isinstance(data, np.ndarray) else data
+
+    # Pack the data using msgpack
+    packed_data = msgpack.packb({'timestamp': timestamp_list, 'data': data_list}, use_bin_type=True)
     return Response(packed_data, content_type='application/x-msgpack')
 
 @app.get("/speed/<int:user_id>/<string:interval>")
@@ -28,7 +34,7 @@ def get_users_speed(user_id, interval):
 
         timestamp, data = data_access.get_speed(interval)
         return make_response(timestamp, data)
-    except:
+    except Exception as e:
         logging.error(f"Error while processing request: {e}")
         abort(500, description='Internal server error')
     finally:
@@ -203,3 +209,5 @@ def get_users_rpm(user_id, interval):
         if data_access:
             data_access.close_data_access()
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

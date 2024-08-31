@@ -44,7 +44,7 @@ def main(connection=None):
             buff.update_buffer(filtered_data)
 
             current_time = datetime.now()
-            if current_time - before_time >= timedelta(seconds=5):  # Changed from minutes=1 to seconds=10:
+            if current_time - before_time >= timedelta(seconds=5):  
                 averages = buff.give_average_of_data()
                 diagnostics = buff.get_diagnostic_codes()
                 if diagnostics:
