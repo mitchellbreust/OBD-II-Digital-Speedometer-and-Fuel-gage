@@ -42,4 +42,10 @@ This project leverages an embedded system to create a dual-function vehicle dash
 - **LiPo or Li-Ion Battery Pack** (Optional for portable power)
 - **MicroSD Card** (16GB or larger)
 
+## Screenshot
+
+Here is a screenshot of the dashboard:
+
+![Dashboard Screenshot](images/dashboard_screenshot.png)
+
 
