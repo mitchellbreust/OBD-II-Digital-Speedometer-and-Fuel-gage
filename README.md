@@ -46,6 +46,6 @@ This project leverages an embedded system to create a dual-function vehicle dash
 
 Here is a screenshot of the dashboard:
 
-![Dashboard Screenshot](./Screenshot from 2024-09-01 11-06-35.png)
+![Dashboard Screenshot](./Screenshot%20from%202024-09-01%2011-06-35.png)
 
 
